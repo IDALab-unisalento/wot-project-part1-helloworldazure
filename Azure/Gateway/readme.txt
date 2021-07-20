@@ -1,0 +1,1 @@
+Il file che contiene il codice vero e proprio è app.js mentre il file per la configurazione del docker è Dockerfile.arm32v7. Il resto dei file sono generati automaticamente da un tool di azure per la creazione del modulo

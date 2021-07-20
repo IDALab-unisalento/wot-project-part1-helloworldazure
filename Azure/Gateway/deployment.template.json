@@ -1,0 +1,93 @@
+{
+  "$schema-template": "2.0.0",
+  "modulesContent": {
+    "$edgeAgent": {
+      "properties.desired": {
+        "schemaVersion": "1.0",
+        "runtime": {
+          "type": "docker",
+          "settings": {
+            "minDockerVersion": "v1.25",
+            "loggingOptions": "",
+            "registryCredentials": {
+              "containerarticolo": {
+                "username": "$CONTAINER_REGISTRY_USERNAME_containerarticolo",
+                "password": "$CONTAINER_REGISTRY_PASSWORD_containerarticolo",
+                "address": "containerarticolo.azurecr.io"
+              }
+            }
+          }
+        },
+        "systemModules": {
+          "edgeAgent": {
+            "type": "docker",
+            "settings": {
+              "image": "mcr.microsoft.com/azureiotedge-agent:1.1",
+              "createOptions": {}
+            }
+          },
+          "edgeHub": {
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "mcr.microsoft.com/azureiotedge-hub:1.1",
+              "createOptions": {
+                "HostConfig": {
+                  "PortBindings": {
+                    "5671/tcp": [
+                      {
+                        "HostPort": "5671"
+                      }
+                    ],
+                    "8883/tcp": [
+                      {
+                        "HostPort": "8883"
+                      }
+                    ],
+                    "443/tcp": [
+                      {
+                        "HostPort": "443"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "modules": {
+          "ModuloArticolo": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "${MODULES.ModuloArticolo}",
+              "createOptions": {
+                "HostConfig":{
+                  "Binds":[
+                    "//home//pi//Desktop//blink//node_modules//onoff"
+                    ],
+                  "Privileged": true
+                      }
+              }
+            }
+          }
+        }
+      }
+    },
+    "$edgeHub": {
+      "properties.desired": {
+        "schemaVersion": "1.0",
+        "routes": {
+          "ModuloArticoloToIoTHub": "FROM /messages/modules/ModuloArticolo/outputs/output1 INTO $upstream",
+          "SensorToModuloArticolo": "FROM /messages/* WHERE NOT IS_DEFINED ($connectionModuleId) INTO BrokeredEndpoint(\"/modules/ModuloArticolo/inputs/input1\")"
+        },
+        "storeAndForwardConfiguration": {
+          "timeToLiveSecs": 7200
+        }
+      }
+    }
+  }
+}
